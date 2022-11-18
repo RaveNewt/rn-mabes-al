@@ -1,30 +1,45 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { FlatList, Stack, Text } from "native-base";
 import React from "react";
-import { Heading, HStack, Image, Stack } from "native-base";
-import { btn_add } from "../../assets";
+import { TouchableOpacity, View } from "react-native";
+import { Appbar } from "react-native-paper";
+import { useSelector } from "react-redux";
+import UserCard from "../../components/UserCard";
+import { useGetUsersQuery } from "../../services/userAPI";
 
-const Home = ({ navigation }) => {
+const HomeScreen = () => {
+    useGetUsersQuery();
+    const users = useSelector((state) => state.user.users);
+    const navigation = useNavigation();
     return (
-        <Stack>
-            <HStack p={4} shadow={2} justifyContent="center">
-                <Heading
-                    fontSize="2xl"
-                    alignItems={"center"}
-                    textAlign="center"
-                    flex={1}
-                >
-                    Cart App
-                </Heading>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("NewTodo")}
-                >
-                    <Image source={btn_add} size={8} borderColor="black" />
-                </TouchableOpacity>
-            </HStack>
+        <Stack flex={1}>
+            <Appbar.Header>
+                <Appbar.Content title="Mabes App" />
+                <Appbar.Action
+                    icon="plus"
+                    onPress={() => navigation.navigate("UserFormScreen")}
+                />
+            </Appbar.Header>
+            <FlatList
+                data={users || []}
+                keyExtractor={(item) => item.id}
+                ListEmptyComponent={() => (
+                    <View
+                        style={{ flex: 1, padding: 32, alignItems: "center" }}>
+                        <Text>Data is Empty</Text>
+                    </View>
+                )}
+                renderItem={({ item }) => (
+                    <UserCard
+                        user={item}
+                        onPress={() => {}}
+                        name={item.name}
+                        rank={item.rank}
+                    />
+                )}
+            />
         </Stack>
     );
 };
 
-export default Home;
-
-const styles = StyleSheet.create({});
+export default HomeScreen;

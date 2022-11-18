@@ -1,20 +1,19 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
-import Home from "../screens/Home";
-import NewToDo from "../screens/NewToDo";
+import React from 'react'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
-const Stack = createStackNavigator();
+import HomeScreen from '../screens/home'
+import UserFormScreen from '../screens/user-form'
 
-const Router = () => {
-    return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="NewTodo" component={NewToDo} />
-        </Stack.Navigator>
-    );
-};
+const Stack = createNativeStackNavigator()
 
-export default Router;
+const Router = () => (
+  <Stack.Navigator
+    initialRouteName="HomeScreen"
+    screenOptions={{ headerShown: false }}
+  >
+    <Stack.Screen name="HomeScreen" component={HomeScreen} />
+    <Stack.Screen name="UserFormScreen" component={UserFormScreen} />
+  </Stack.Navigator>
+)
 
-const styles = StyleSheet.create({});
+export default Router
