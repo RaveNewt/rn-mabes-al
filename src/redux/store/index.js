@@ -14,6 +14,7 @@ import allReducers from "../reducers";
 import { authAPI } from "../../services/authAPI";
 import { rankAPI } from "../../services/rankAPI";
 import { statusAPI } from "../../services/statusAPI";
+import { userApi } from "../../services/userApi";
 
 const persistedReducer = persistReducer(
     {
@@ -41,6 +42,7 @@ const store = configureStore({
             authAPI.middleware,
             rankAPI.middleware,
             statusAPI.middleware,
+            userApi.middleware,
         ]),
 });
 

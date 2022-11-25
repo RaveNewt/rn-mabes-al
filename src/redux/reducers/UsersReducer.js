@@ -1,6 +1,5 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { rankAPI } from "../../services/rankAPI";
-import { userAPI } from "../../services/userAPI";
+import { userApi } from "../../services/userApi";
 
 const initialState = {
     users: [],
@@ -8,7 +7,7 @@ const initialState = {
 
 export default createReducer(initialState, (builder) => {
     builder.addMatcher(
-        userAPI.endpoints.getUsers.matchFulfilled,
+        userApi.endpoints.getUsers.matchFulfilled,
         (state, action) => {
             return {
                 ...state,

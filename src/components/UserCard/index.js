@@ -1,7 +1,7 @@
 import React from "react";
 import { Avatar, Card } from "react-native-paper";
 
-const UserCard = ({ user, onPress, name, rank }) => {
+const UserCard = ({ user, onPress }) => {
     return (
         <Card
             mode="elevated"
@@ -11,12 +11,12 @@ const UserCard = ({ user, onPress, name, rank }) => {
                 margin: 12,
             }}>
             <Card.Title
-                title={name ?? ""}
+                title={user.name ?? ""}
                 titleStyle={{
                     fontWeight: "bold",
                     fontSize: 18,
                 }}
-                subtitle={rank ?? ""}
+                subtitle={user.rank ?? ""}
                 subtitleVariant="bodyMedium"
                 left={(props) => (
                     <Avatar.Image

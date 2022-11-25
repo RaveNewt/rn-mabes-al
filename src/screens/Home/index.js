@@ -1,16 +1,27 @@
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { FlatList, Stack, Text } from "native-base";
-import React from "react";
+import React, { useEffect } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { Appbar } from "react-native-paper";
 import { useSelector } from "react-redux";
 import UserCard from "../../components/UserCard";
-import { useGetUsersQuery } from "../../services/userAPI";
+import { useGetUsersQuery } from "../../services/userApi";
 
-const HomeScreen = () => {
-    useGetUsersQuery();
-    const users = useSelector((state) => state.user.users);
-    const navigation = useNavigation();
+const HomeScreen = ({ navigation }) => {
+    const isFocused = useIsFocused();
+
+    const { data, refetch, isLoading } = useGetUsersQuery({
+        perPage: 100,
+        page: 1,
+    });
+
+    useEffect(() => {
+        if (isFocused) {
+            refetch();
+            console.log("dataPers", data?.data);
+        }
+    }, [isFocused]);
+
     return (
         <Stack flex={1}>
             <Appbar.Header>
@@ -21,7 +32,7 @@ const HomeScreen = () => {
                 />
             </Appbar.Header>
             <FlatList
-                data={users || []}
+                data={data?.data || []}
                 keyExtractor={(item) => item.id}
                 ListEmptyComponent={() => (
                     <View
@@ -32,9 +43,12 @@ const HomeScreen = () => {
                 renderItem={({ item }) => (
                     <UserCard
                         user={item}
-                        onPress={() => {}}
-                        name={item.name}
-                        rank={item.rank}
+                        onPress={() => {
+                            navigation.navigate("DetailScreen", {
+                                id: item.id,
+                            });
+                            console.log("item", item.id);
+                        }}
                     />
                 )}
             />

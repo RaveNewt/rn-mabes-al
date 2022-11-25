@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Button, HStack, ScrollView, Stack } from "native-base";
+import { Button, ScrollView, Stack } from "native-base";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -8,7 +8,7 @@ import {
     TextInput as TextInputRNPaper,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, View, Image } from "react-native";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm, useWatch } from "react-hook-form";
 
@@ -19,23 +19,27 @@ import dayjs from "dayjs";
 import { ErrorMessage } from "@hookform/error-message";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
-import { useGetRanksQuery } from "../../services/rankAPI";
-import { useGetStatusesQuery } from "../../services/statusAPI";
-import { usePostUserMutation } from "../../services/authAPI";
+import * as ImagePicker from "expo-image-picker";
 
-const Detail = () => {
-    useGetRanksQuery();
-    useGetStatusesQuery();
+const Detail = ({
+    initialValues = {},
+    ranks = [],
+    statuses = [],
+    isLoading,
+    images,
+    onSubmit,
+    onBackPress,
+}) => {
     const navigation = useNavigation();
-    const initialValues = {
-        nrp: "",
-        name: "",
-        born_place: "",
-        born_date: null,
-        address: "",
-        rank_id: "",
-        status_id: "",
-    };
+    // const initialValues = {
+    //     nrp: "",
+    //     name: "",
+    //     born_place: "",
+    //     born_date: null,
+    //     address: "",
+    //     rank_id: "",
+    //     status_id: "",
+    // };
     const methods = useForm({
         mode: "all",
         defaultValues: initialValues,
@@ -48,50 +52,42 @@ const Detail = () => {
         control,
         name: "born_date",
     });
+    const imageHook = useWatch({
+        control,
+        name: "image",
+    });
 
     const [date, setDate] = useState(new Date());
     const [showDate, setShowDate] = useState(false);
-    const [postUser, { isLoading }] = usePostUserMutation();
+    const [image, setImage] = useState(null);
 
-    const ranks = useSelector((state) => state.rank.ranks);
-    const ranksDropDown = ranks.map((item) => {
-        return {
-            label: item.name,
-            value: item.id,
-        };
-    });
-
-    const statuses = useSelector((state) => state.status.statuses);
-    console.log(statuses);
-    const statusesDropDown = statuses.map((item) => {
-        return {
-            label: item.name,
-            value: item.id,
-        };
-    });
+    const pickImage = async () => {
+        try {
+            // No permissions request is necessary for launching the image library
+            let result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                aspect: [4, 3],
+                quality: 1,
+                allowsEditing: true,
+            });
+            console.log("result", result);
+            if (!result.cancelled) {
+                // setValue("image", result.assets[0], { shouldValidate: true });
+                setImage(result.uri);
+            }
+        } catch (e) {
+            console.log("err", e);
+        }
+    };
 
     const handleBornDateSave = () => {
         setValue("born_date", date, { shouldValidate: true });
         setShowDate(false);
     };
 
-    const onSubmit = (values) => {
-        const payload = {
-            ...values,
-            born_date: dayjs(values.born_date).format("DD MMMM YYYY"),
-        };
-        console.log("payload", payload);
-        postUser(payload)
-            .unwrap()
-            .then((_) => navigation.goBack())
-            .catch((err) => {
-                console.log("error", err);
-                Alert.alert("Error", err.data.error);
-            });
-    };
-
     useEffect(() => {
         register("born_date");
+        register("image");
     }, [register]);
 
     return (
@@ -180,17 +176,56 @@ const Detail = () => {
                     <PaperDropdown
                         label="Rank"
                         name="rank_id"
-                        list={ranksDropDown}
+                        list={ranks}
                         control={control}
                         mode="outlined"
+                        dropdownStyle={{
+                            marginBottom: 16,
+                        }}
                     />
                     <PaperDropdown
                         label="Status"
                         name="status_id"
-                        list={statusesDropDown}
+                        list={statuses}
                         control={control}
                         mode="outlined"
+                        dropdownStyle={{
+                            marginBottom: 16,
+                        }}
                     />
+                    <View
+                        style={{
+                            flex: 1,
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}>
+                        {image && (
+                            <Image
+                                style={{
+                                    width: 200,
+                                    height: 200,
+                                }}
+                                alt="img-content"
+                                borderRadius={8}
+                                source={{ uri: image }}
+                                resizeMode="cover"
+                            />
+                        )}
+                        <ErrorMessage
+                            errors={formState.errors}
+                            name="image"
+                            render={({ message }) => (
+                                <HelperText
+                                    type="error"
+                                    visible={!!message}
+                                    style={{ fontSize: 12 }}>
+                                    {message}
+                                </HelperText>
+                            )}
+                        />
+                        <Button onPress={pickImage}>Pick Image</Button>
+                    </View>
                     {isLoading ? (
                         <ActivityIndicator animating />
                     ) : (
